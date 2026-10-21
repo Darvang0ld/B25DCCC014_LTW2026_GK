@@ -26,7 +26,7 @@ const App = () => {
       .finally(() => setLoading(false));
   }, []);
 
-  // Tăng / giảm tồn kho (delta = +1 hoặc -1), không sửa trực tiếp state
+  // Tăng / giảm tồn kho (delta = +1 hoặc -1)
   const handleChangeStock = (id, delta) => {
     setProducts((prev) =>
       prev.map((p) => (p.id === id ? { ...p, stock: p.stock + delta } : p))
@@ -36,6 +36,14 @@ const App = () => {
   // Xóa sản phẩm theo id
   const handleDelete = (id) => {
     setProducts((prev) => prev.filter((p) => p.id !== id));
+  };
+
+  // Thêm sản phẩm mới vào cuối danh sách, mã = mã lớn nhất + 1
+  const handleAdd = (newProduct) => {
+    setProducts((prev) => {
+      const maxId = prev.reduce((max, p) => Math.max(max, p.id), 0);
+      return [...prev, { ...newProduct, id: maxId + 1 }];
+    });
   };
 
   return (
@@ -53,7 +61,7 @@ const App = () => {
               />
             }
           />
-          <Route path="products/new" element={<AddProduct />} />
+          <Route path="products/new" element={<AddProduct onAdd={handleAdd} />} />
           <Route path="products/:id" element={<ProductDetail products={products} />} />
         </Route>
       </Routes>
