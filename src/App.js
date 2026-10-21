@@ -10,21 +10,51 @@ import ProductList from './pages/ProductList';
 import AddProduct from './pages/AddProduct';
 import ProductDetail from './pages/ProductDetail';
 
+const STORAGE_KEY = 'gk_products';
+
 const App = () => {
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
 
-  // Mounting: tải dữ liệu từ API đúng 1 lần khi mở ứng dụng
+  // Mounting: đọc dữ liệu đã lưu, nếu không có thì gọi API
   useEffect(() => {
+    // Có dữ liệu lưu trên trình duyệt thì dùng luôn, không gọi API
+    try {
+      const saved = localStorage.getItem(STORAGE_KEY);
+      if (saved) {
+        setProducts(JSON.parse(saved));
+        setLoading(false);
+        return;
+      }
+    } catch (err) {
+      // Dữ liệu lưu bị hỏng: bỏ qua và gọi API bình thường
+    }
+
     const controller = new AbortController();
 
     axios
       .get('/data/products.json', { signal: controller.signal })
-      .then((res) => setProducts(res.data))
-      .catch(() => setError('Không tải được dữ liệu'))
-      .finally(() => setLoading(false));
+      .then((res) => {
+        setProducts(res.data);
+        setLoading(false);
+      })
+      .catch((err) => {
+        // Request bị hủy (unmount) thì bỏ qua, không đổi state
+        if (axios.isCancel(err)) return;
+        setError('Không tải được dữ liệu');
+        setLoading(false);
+      });
+
+    // Unmounting: hủy request đang chạy
+    return () => controller.abort();
   }, []);
+
+  // Updating: lưu dữ liệu sau khi đã tải xong
+  useEffect(() => {
+    if (loading) return; // chưa tải xong thì không ghi đè bằng mảng rỗng
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(products));
+  }, [products, loading]);
 
   // Tăng / giảm tồn kho (delta = +1 hoặc -1)
   const handleChangeStock = (id, delta) => {

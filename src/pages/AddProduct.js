@@ -10,27 +10,28 @@ const AddProduct = ({ onAdd }) => {
   const [category, setCategory] = useState(CATEGORIES[0]); // mặc định: Văn phòng phẩm
   const [price, setPrice] = useState('');
   const [stock, setStock] = useState('');
-  const [message, setMessage] = useState('');
+  const [formError, setFormError] = useState('');
 
   const handleSubmit = (e) => {
     e.preventDefault();
 
-    // Kiểm tra ô trống
+    // 1. Kiểm tra ô trống
     if (name.trim() === '' || price === '' || stock === '') {
-      setMessage('Vui lòng nhập đầy đủ thông tin');
+      setFormError('Vui lòng nhập đầy đủ thông tin');
       return;
     }
 
-        const priceNum = Number(price);
+    // 2. Giá phải > 0; số lượng phải là số nguyên >= 0
+    const priceNum = Number(price);
     const stockNum = Number(stock);
 
-    // Giá phải > 0; số lượng phải là số nguyên >= 0
     if (!(priceNum > 0) || !Number.isInteger(stockNum) || stockNum < 0) {
-      setMessage('Giá phải lớn hơn 0, số lượng là số nguyên không âm');
+      setFormError('Giá phải lớn hơn 0, số lượng là số nguyên không âm');
       return;
     }
 
-    setMessage('');
+    // 3. Hợp lệ: thêm sản phẩm
+    setFormError('');
     onAdd({
       name: name.trim(),
       category,
@@ -38,8 +39,9 @@ const AddProduct = ({ onAdd }) => {
       stock: stockNum,
     });
 
-    // replace: true để nút Back không quay lại form
-    navigate('/products', { replace: true });
+    // replace: true để Back không quay lại form; state gửi kèm thông báo
+    const message = `Đã thêm sản phẩm ${name.trim()}`;
+    navigate('/products', { replace: true, state: { message } });
   };
 
   return (
@@ -92,7 +94,7 @@ const AddProduct = ({ onAdd }) => {
         </div>
 
         <button type="submit">Thêm</button>
-        {message && <p className="error">{message}</p>}
+        {formError && <p className="error">{formError}</p>}
       </form>
     </div>
   );
