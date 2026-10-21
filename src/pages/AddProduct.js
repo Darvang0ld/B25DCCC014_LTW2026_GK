@@ -21,12 +21,21 @@ const AddProduct = ({ onAdd }) => {
       return;
     }
 
+        const priceNum = Number(price);
+    const stockNum = Number(stock);
+
+    // Giá phải > 0; số lượng phải là số nguyên >= 0
+    if (!(priceNum > 0) || !Number.isInteger(stockNum) || stockNum < 0) {
+      setMessage('Giá phải lớn hơn 0, số lượng là số nguyên không âm');
+      return;
+    }
+
     setMessage('');
     onAdd({
       name: name.trim(),
       category,
-      price: Number(price),
-      stock: Number(stock),
+      price: priceNum,
+      stock: stockNum,
     });
 
     // replace: true để nút Back không quay lại form
