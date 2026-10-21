@@ -26,12 +26,33 @@ const App = () => {
       .finally(() => setLoading(false));
   }, []);
 
+  // Tăng / giảm tồn kho (delta = +1 hoặc -1), không sửa trực tiếp state
+  const handleChangeStock = (id, delta) => {
+    setProducts((prev) =>
+      prev.map((p) => (p.id === id ? { ...p, stock: p.stock + delta } : p))
+    );
+  };
+
+  // Xóa sản phẩm theo id
+  const handleDelete = (id) => {
+    setProducts((prev) => prev.filter((p) => p.id !== id));
+  };
+
   return (
     <div className="app" data-build={BUILD_TAG}>
       <Routes>
         <Route path="/" element={<Layout loading={loading} error={error} />}>
           <Route index element={<Home products={products} />} />
-          <Route path="products" element={<ProductList products={products} />} />
+          <Route
+            path="products"
+            element={
+              <ProductList
+                products={products}
+                onChangeStock={handleChangeStock}
+                onDelete={handleDelete}
+              />
+            }
+          />
           <Route path="products/new" element={<AddProduct />} />
           <Route path="products/:id" element={<ProductDetail products={products} />} />
         </Route>

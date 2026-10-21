@@ -50,7 +50,8 @@ tbody tr:hover {
   background: #fff3cd;
 }
 
-.low-stock {
+.low-stock,
+.low-stock a {
   color: red;
 }
 
